@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?><process version="9.10.013">
+  <context>
+    <input/>
+    <output/>
+    <macros/>
+  </context>
+  <operator activated="true" class="process" compatibility="9.10.013" expanded="true" name="Process">
+    <parameter key="logverbosity" value="init"/>
+    <parameter key="random_seed" value="2001"/>
+    <parameter key="send_mail" value="never"/>
+    <parameter key="notification_email" value=""/>
+    <parameter key="process_duration_for_mail" value="30"/>
+    <parameter key="encoding" value="SYSTEM"/>
+    <process expanded="true">
+      <operator activated="true" class="retrieve" compatibility="9.10.013" expanded="true" height="68" name="Retrieve 3. Selected Attributes" width="90" x="112" y="85">
+        <parameter key="repository_entry" value="../Results/3. Selected Attributes"/>
+      </operator>
+      <operator activated="true" class="subprocess" compatibility="9.10.013" expanded="true" height="82" name="Data Cleaning" width="90" x="246" y="85">
+        <process expanded="true">
+          <operator activated="true" class="filter_examples" compatibility="9.10.013" expanded="true" height="103" name="Filter delivered" width="90" x="45" y="34">
+            <parameter key="parameter_expression" value=""/>
+            <parameter key="condition_class" value="custom_filters"/>
+            <parameter key="invert_filter" value="false"/>
+            <list key="filters_list">
+              <parameter key="filters_entry_key" value="order_status.equals.delivered"/>
+            </list>
+            <parameter key="filters_logic_and" value="true"/>
+            <parameter key="filters_check_metadata" value="true"/>
+            <description align="center" color="yellow" colored="true" width="126">Selected only Delivered orders</description>
+          </operator>
+          <operator activated="true" class="filter_examples" compatibility="9.10.013" expanded="true" height="103" name="Drop missing values" width="90" x="112" y="238">
+            <parameter key="parameter_expression" value=""/>
+            <parameter key="condition_class" value="custom_filters"/>
+            <parameter key="invert_filter" value="false"/>
+            <list key="filters_list">
+              <parameter key="filters_entry_key" value="order_approved_at.is_not_missing."/>
+              <parameter key="filters_entry_key" value="product_category_name.is_not_missing."/>
+              <parameter key="filters_entry_key" value="order_delivered_customer_date.is_not_missing."/>
+              <parameter key="filters_entry_key" value="product_weight_g.is_not_missing."/>
+            </list>
+            <parameter key="filters_logic_and" value="true"/>
+            <parameter key="filters_check_metadata" value="true"/>
+            <description align="center" color="yellow" colored="true" width="126">Droped the missing values</description>
+          </operator>
+          <operator activated="true" class="aggregate" compatibility="9.10.013" expanded="true" height="82" name="Aggregate" width="90" x="380" y="85">
+            <parameter key="use_default_aggregation" value="false"/>
+            <parameter key="attribute_filter_type" value="all"/>
+            <parameter key="attribute" value=""/>
+            <parameter key="attributes" value=""/>
+            <parameter key="use_except_expression" value="false"/>
+            <parameter key="value_type" value="attribute_value"/>
+            <parameter key="use_value_type_exception" value="false"/>
+            <parameter key="except_value_type" value="time"/>
+            <parameter key="block_type" value="attribute_block"/>
+            <parameter key="use_block_type_exception" value="false"/>
+            <parameter key="except_block_type" value="value_matrix_row_start"/>
+            <parameter key="invert_selection" value="false"/>
+            <parameter key="include_special_attributes" value="false"/>
+            <parameter key="default_aggregation_function" value="average"/>
+            <list key="aggregation_attributes">
+              <parameter key="payment_value" value="maximum"/>
+            </list>
+            <parameter key="group_by_attributes" value="payment_type|order_id"/>
+            <parameter key="count_all_combinations" value="false"/>
+            <parameter key="only_distinct" value="false"/>
+            <parameter key="ignore_missings" value="true"/>
+            <description align="center" color="yellow" colored="true" width="126">aggregate the highest weight in the total aount paid.</description>
+          </operator>
+          <operator activated="true" class="concurrency:join" compatibility="9.10.013" expanded="true" height="82" name="Join (7)" width="90" x="380" y="442">
+            <parameter key="remove_double_attributes" value="true"/>
+            <parameter key="join_type" value="inner"/>
+            <parameter key="use_id_attribute_as_key" value="false"/>
+            <list key="key_attributes">
+              <parameter key="order_id" value="order_id"/>
+            </list>
+            <parameter key="keep_both_join_attributes" value="false"/>
+          </operator>
+          <operator activated="true" class="remove_duplicates" compatibility="9.10.013" expanded="true" height="103" name="Remove Duplicates" width="90" x="514" y="340">
+            <parameter key="attribute_filter_type" value="subset"/>
+            <parameter key="attribute" value="order_id"/>
+            <parameter key="attributes" value="order_id"/>
+            <parameter key="use_except_expression" value="false"/>
+            <parameter key="value_type" value="attribute_value"/>
+            <parameter key="use_value_type_exception" value="false"/>
+            <parameter key="except_value_type" value="time"/>
+            <parameter key="block_type" value="attribute_block"/>
+            <parameter key="use_block_type_exception" value="false"/>
+            <parameter key="except_block_type" value="value_matrix_row_start"/>
+            <parameter key="invert_selection" value="false"/>
+            <parameter key="include_special_attributes" value="false"/>
+            <parameter key="treat_missing_values_as_duplicates" value="false"/>
+            <description align="center" color="yellow" colored="true" width="126">Remove duplicated order_id</description>
+          </operator>
+          <operator activated="true" class="filter_examples" compatibility="9.10.013" expanded="true" height="103" name="Filter delivered (2)" width="90" x="648" y="85">
+            <parameter key="parameter_expression" value=""/>
+            <parameter key="condition_class" value="custom_filters"/>
+            <parameter key="invert_filter" value="false"/>
+            <list key="filters_list">
+              <parameter key="filters_entry_key" value="product_category_name.is_not_missing."/>
+              <parameter key="filters_entry_key" value="order_delivered_carrier_date.is_not_missing."/>
+            </list>
+            <parameter key="filters_logic_and" value="true"/>
+            <parameter key="filters_check_metadata" value="true"/>
+            <description align="left" color="yellow" colored="true" width="126">drop missing product_category_name (25 missing values)</description>
+          </operator>
+          <connect from_port="in 1" to_op="Filter delivered" to_port="example set input"/>
+          <connect from_op="Filter delivered" from_port="example set output" to_op="Drop missing values" to_port="example set input"/>
+          <connect from_op="Drop missing values" from_port="example set output" to_op="Aggregate" to_port="example set input"/>
+          <connect from_op="Drop missing values" from_port="original" to_op="Join (7)" to_port="right"/>
+          <connect from_op="Aggregate" from_port="example set output" to_op="Join (7)" to_port="left"/>
+          <connect from_op="Join (7)" from_port="join" to_op="Remove Duplicates" to_port="example set input"/>
+          <connect from_op="Remove Duplicates" from_port="example set output" to_op="Filter delivered (2)" to_port="example set input"/>
+          <connect from_op="Filter delivered (2)" from_port="example set output" to_port="out 1"/>
+          <portSpacing port="source_in 1" spacing="0"/>
+          <portSpacing port="source_in 2" spacing="0"/>
+          <portSpacing port="sink_out 1" spacing="0"/>
+          <portSpacing port="sink_out 2" spacing="0"/>
+        </process>
+      </operator>
+      <operator activated="false" class="store" compatibility="9.10.013" expanded="true" height="68" name="Store" width="90" x="380" y="85">
+        <parameter key="repository_entry" value="//Lab Assignment - Supervised Learning Models/Results/4. Clean Selected Attributes"/>
+      </operator>
+      <connect from_op="Retrieve 3. Selected Attributes" from_port="output" to_op="Data Cleaning" to_port="in 1"/>
+      <connect from_op="Data Cleaning" from_port="out 1" to_port="result 1"/>
+      <portSpacing port="source_input 1" spacing="0"/>
+      <portSpacing port="sink_result 1" spacing="0"/>
+      <portSpacing port="sink_result 2" spacing="0"/>
+    </process>
+  </operator>
+</process>

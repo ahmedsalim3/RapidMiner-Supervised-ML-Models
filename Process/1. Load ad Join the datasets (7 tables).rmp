@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?><process version="9.10.013">
+  <context>
+    <input/>
+    <output/>
+    <macros/>
+  </context>
+  <operator activated="true" class="process" compatibility="9.10.013" expanded="true" name="Process">
+    <parameter key="logverbosity" value="init"/>
+    <parameter key="random_seed" value="2001"/>
+    <parameter key="send_mail" value="never"/>
+    <parameter key="notification_email" value=""/>
+    <parameter key="process_duration_for_mail" value="30"/>
+    <parameter key="encoding" value="SYSTEM"/>
+    <process expanded="true">
+      <operator activated="true" class="subprocess" compatibility="9.10.013" expanded="true" height="82" name="Loading 7 Dataset" width="90" x="581" y="34">
+        <process expanded="true">
+          <operator activated="true" class="retrieve" compatibility="9.10.013" expanded="true" height="68" name="Retrieve olist_order_items_dataset" width="90" x="45" y="34">
+            <parameter key="repository_entry" value="../Data/olist_order_items_dataset"/>
+          </operator>
+          <operator activated="true" class="retrieve" compatibility="9.10.013" expanded="true" height="68" name="Retrieve olist_order_payments_dataset" width="90" x="45" y="136">
+            <parameter key="repository_entry" value="../Data/olist_order_payments_dataset"/>
+          </operator>
+          <operator activated="true" class="concurrency:join" compatibility="9.10.013" expanded="true" height="82" name="Join" width="90" x="179" y="34">
+            <parameter key="remove_double_attributes" value="true"/>
+            <parameter key="join_type" value="inner"/>
+            <parameter key="use_id_attribute_as_key" value="false"/>
+            <list key="key_attributes">
+              <parameter key="order_id" value="order_id"/>
+            </list>
+            <parameter key="keep_both_join_attributes" value="false"/>
+          </operator>
+          <operator activated="true" class="retrieve" compatibility="9.10.013" expanded="true" height="68" name="Retrieve olist_order_reviews_dataset" width="90" x="179" y="136">
+            <parameter key="repository_entry" value="../Data/olist_order_reviews_dataset"/>
+          </operator>
+          <operator activated="true" class="concurrency:join" compatibility="9.10.013" expanded="true" height="82" name="Join (2)" width="90" x="313" y="34">
+            <parameter key="remove_double_attributes" value="true"/>
+            <parameter key="join_type" value="inner"/>
+            <parameter key="use_id_attribute_as_key" value="false"/>
+            <list key="key_attributes">
+              <parameter key="order_id" value="order_id"/>
+            </list>
+            <parameter key="keep_both_join_attributes" value="false"/>
+          </operator>
+          <operator activated="true" class="retrieve" compatibility="9.10.013" expanded="true" height="68" name="Retrieve olist_orders_dataset" width="90" x="313" y="136">
+            <parameter key="repository_entry" value="../Data/olist_orders_dataset"/>
+          </operator>
+          <operator activated="true" class="concurrency:join" compatibility="9.10.013" expanded="true" height="82" name="Join (3)" width="90" x="447" y="34">
+            <parameter key="remove_double_attributes" value="true"/>
+            <parameter key="join_type" value="inner"/>
+            <parameter key="use_id_attribute_as_key" value="false"/>
+            <list key="key_attributes">
+              <parameter key="order_id" value="order_id"/>
+            </list>
+            <parameter key="keep_both_join_attributes" value="false"/>
+          </operator>
+          <operator activated="true" class="retrieve" compatibility="9.10.013" expanded="true" height="68" name="Retrieve olist_products_dataset" width="90" x="447" y="136">
+            <parameter key="repository_entry" value="../Data/olist_products_dataset"/>
+          </operator>
+          <operator activated="true" class="concurrency:join" compatibility="9.10.013" expanded="true" height="82" name="Join (4)" width="90" x="581" y="34">
+            <parameter key="remove_double_attributes" value="true"/>
+            <parameter key="join_type" value="inner"/>
+            <parameter key="use_id_attribute_as_key" value="false"/>
+            <list key="key_attributes">
+              <parameter key="product_id" value="product_id"/>
+            </list>
+            <parameter key="keep_both_join_attributes" value="false"/>
+          </operator>
+          <operator activated="true" class="retrieve" compatibility="9.10.013" expanded="true" height="68" name="Retrieve olist_sellers_dataset" width="90" x="581" y="136">
+            <parameter key="repository_entry" value="../Data/olist_sellers_dataset"/>
+          </operator>
+          <operator activated="true" class="retrieve" compatibility="9.10.013" expanded="true" height="68" name="Retrieve olist_customers_dataset" width="90" x="715" y="136">
+            <parameter key="repository_entry" value="../Data/olist_customers_dataset"/>
+          </operator>
+          <operator activated="true" class="concurrency:join" compatibility="9.10.013" expanded="true" height="82" name="Join (5)" width="90" x="715" y="34">
+            <parameter key="remove_double_attributes" value="true"/>
+            <parameter key="join_type" value="inner"/>
+            <parameter key="use_id_attribute_as_key" value="false"/>
+            <list key="key_attributes">
+              <parameter key="seller_id" value="seller_id"/>
+            </list>
+            <parameter key="keep_both_join_attributes" value="false"/>
+          </operator>
+          <operator activated="true" class="concurrency:join" compatibility="9.10.013" expanded="true" height="82" name="Join (6)" width="90" x="849" y="34">
+            <parameter key="remove_double_attributes" value="true"/>
+            <parameter key="join_type" value="inner"/>
+            <parameter key="use_id_attribute_as_key" value="false"/>
+            <list key="key_attributes">
+              <parameter key="customer_id" value="customer_id"/>
+            </list>
+            <parameter key="keep_both_join_attributes" value="false"/>
+          </operator>
+          <connect from_op="Retrieve olist_order_items_dataset" from_port="output" to_op="Join" to_port="left"/>
+          <connect from_op="Retrieve olist_order_payments_dataset" from_port="output" to_op="Join" to_port="right"/>
+          <connect from_op="Join" from_port="join" to_op="Join (2)" to_port="left"/>
+          <connect from_op="Retrieve olist_order_reviews_dataset" from_port="output" to_op="Join (2)" to_port="right"/>
+          <connect from_op="Join (2)" from_port="join" to_op="Join (3)" to_port="left"/>
+          <connect from_op="Retrieve olist_orders_dataset" from_port="output" to_op="Join (3)" to_port="right"/>
+          <connect from_op="Join (3)" from_port="join" to_op="Join (4)" to_port="left"/>
+          <connect from_op="Retrieve olist_products_dataset" from_port="output" to_op="Join (4)" to_port="right"/>
+          <connect from_op="Join (4)" from_port="join" to_op="Join (5)" to_port="left"/>
+          <connect from_op="Retrieve olist_sellers_dataset" from_port="output" to_op="Join (5)" to_port="right"/>
+          <connect from_op="Retrieve olist_customers_dataset" from_port="output" to_op="Join (6)" to_port="right"/>
+          <connect from_op="Join (5)" from_port="join" to_op="Join (6)" to_port="left"/>
+          <connect from_op="Join (6)" from_port="join" to_port="out 1"/>
+          <portSpacing port="source_in 1" spacing="0"/>
+          <portSpacing port="sink_out 1" spacing="0"/>
+          <portSpacing port="sink_out 2" spacing="0"/>
+        </process>
+      </operator>
+      <operator activated="false" class="store" compatibility="9.10.013" expanded="true" height="68" name="Store" width="90" x="715" y="34">
+        <parameter key="repository_entry" value="//Lab Assignment - Supervised Learning Models/Results/1. Load and Join the datasets (7 tables)"/>
+      </operator>
+      <connect from_op="Loading 7 Dataset" from_port="out 1" to_port="result 1"/>
+      <portSpacing port="source_input 1" spacing="0"/>
+      <portSpacing port="sink_result 1" spacing="0"/>
+      <portSpacing port="sink_result 2" spacing="0"/>
+    </process>
+  </operator>
+</process>

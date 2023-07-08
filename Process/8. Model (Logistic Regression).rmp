@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?><process version="9.10.013">
+  <context>
+    <input/>
+    <output/>
+    <macros/>
+  </context>
+  <operator activated="true" class="process" compatibility="9.10.013" expanded="true" name="Process">
+    <parameter key="logverbosity" value="init"/>
+    <parameter key="random_seed" value="2001"/>
+    <parameter key="send_mail" value="never"/>
+    <parameter key="notification_email" value=""/>
+    <parameter key="process_duration_for_mail" value="30"/>
+    <parameter key="encoding" value="SYSTEM"/>
+    <process expanded="true">
+      <operator activated="true" class="retrieve" compatibility="9.10.013" expanded="true" height="68" name="Retrieve 4. Clean Selected Attributes" width="90" x="45" y="34">
+        <parameter key="repository_entry" value="../Results/4. Clean Selected Attributes"/>
+      </operator>
+      <operator activated="true" class="select_attributes" compatibility="9.10.013" expanded="true" height="82" name="Select Attributes (3)" width="90" x="179" y="34">
+        <parameter key="attribute_filter_type" value="subset"/>
+        <parameter key="attribute" value=""/>
+        <parameter key="attributes" value="actual_delivery_days|customer_city|customer_state|delivery_process|ealy_deliveries|early_deliveries|estimated_delivery_days|freight_value|late_deliveries|maximum(payment_value)|order_id|order_status|payment_type|payment_value|price|product_category_name|product_description_lenght|product_photos_qty|product_volumen_cm3|product_weight_g|Relative_Delivery_Cost|same_city|same_state|seller_city|seller_state|Experience_Nominal"/>
+        <parameter key="use_except_expression" value="false"/>
+        <parameter key="value_type" value="attribute_value"/>
+        <parameter key="use_value_type_exception" value="false"/>
+        <parameter key="except_value_type" value="time"/>
+        <parameter key="block_type" value="attribute_block"/>
+        <parameter key="use_block_type_exception" value="false"/>
+        <parameter key="except_block_type" value="value_matrix_row_start"/>
+        <parameter key="invert_selection" value="false"/>
+        <parameter key="include_special_attributes" value="false"/>
+        <description align="center" color="yellow" colored="true" width="126">Unselect the Dates&lt;br/&gt;</description>
+      </operator>
+      <operator activated="true" class="set_role" compatibility="9.10.013" expanded="true" height="82" name="Set Role" width="90" x="313" y="34">
+        <parameter key="attribute_name" value="Experience_Nominal"/>
+        <parameter key="target_role" value="label"/>
+        <list key="set_additional_roles">
+          <parameter key="order_id" value="id"/>
+        </list>
+      </operator>
+      <operator activated="true" class="sample_stratified" compatibility="9.10.013" expanded="true" height="82" name="Sample (Stratified)" width="90" x="447" y="34">
+        <parameter key="sample" value="absolute"/>
+        <parameter key="sample_size" value="6000"/>
+        <parameter key="sample_ratio" value="0.1"/>
+        <parameter key="use_local_random_seed" value="false"/>
+        <parameter key="local_random_seed" value="1992"/>
+      </operator>
+      <operator activated="true" class="normalize" compatibility="9.10.013" expanded="true" height="103" name="Normalize" width="90" x="447" y="187">
+        <parameter key="return_preprocessing_model" value="false"/>
+        <parameter key="create_view" value="false"/>
+        <parameter key="attribute_filter_type" value="all"/>
+        <parameter key="attribute" value=""/>
+        <parameter key="attributes" value=""/>
+        <parameter key="use_except_expression" value="false"/>
+        <parameter key="value_type" value="numeric"/>
+        <parameter key="use_value_type_exception" value="false"/>
+        <parameter key="except_value_type" value="real"/>
+        <parameter key="block_type" value="value_series"/>
+        <parameter key="use_block_type_exception" value="false"/>
+        <parameter key="except_block_type" value="value_series_end"/>
+        <parameter key="invert_selection" value="false"/>
+        <parameter key="include_special_attributes" value="false"/>
+        <parameter key="method" value="Z-transformation"/>
+        <parameter key="min" value="0.0"/>
+        <parameter key="max" value="1.0"/>
+        <parameter key="allow_negative_values" value="false"/>
+      </operator>
+      <operator activated="true" class="subprocess" compatibility="9.10.013" expanded="true" height="103" name="Split,Train, Test" width="90" x="581" y="34">
+        <process expanded="true">
+          <operator activated="true" class="split_data" compatibility="9.10.013" expanded="true" height="103" name="Split Data" width="90" x="45" y="187">
+            <enumeration key="partitions">
+              <parameter key="ratio" value="0.8"/>
+              <parameter key="ratio" value="0.2"/>
+            </enumeration>
+            <parameter key="sampling_type" value="automatic"/>
+            <parameter key="use_local_random_seed" value="false"/>
+            <parameter key="local_random_seed" value="1992"/>
+          </operator>
+          <operator activated="true" class="h2o:logistic_regression" compatibility="9.10.001" expanded="true" height="124" name="Logistic Regression" width="90" x="246" y="34">
+            <parameter key="solver" value="AUTO"/>
+            <parameter key="reproducible" value="true"/>
+            <parameter key="maximum_number_of_threads" value="1"/>
+            <parameter key="use_regularization" value="true"/>
+            <parameter key="lambda_search" value="true"/>
+            <parameter key="number_of_lambdas" value="0"/>
+            <parameter key="lambda_min_ratio" value="0.0"/>
+            <parameter key="early_stopping" value="true"/>
+            <parameter key="stopping_rounds" value="3"/>
+            <parameter key="stopping_tolerance" value="0.001"/>
+            <parameter key="standardize" value="true"/>
+            <parameter key="non-negative_coefficients" value="false"/>
+            <parameter key="add_intercept" value="false"/>
+            <parameter key="compute_p-values" value="true"/>
+            <parameter key="remove_collinear_columns" value="true"/>
+            <parameter key="missing_values_handling" value="MeanImputation"/>
+            <parameter key="max_iterations" value="0"/>
+            <parameter key="max_runtime_seconds" value="0"/>
+          </operator>
+          <operator activated="true" class="apply_model" compatibility="9.10.013" expanded="true" height="82" name="Apply Model" width="90" x="380" y="187">
+            <list key="application_parameters"/>
+            <parameter key="create_view" value="false"/>
+          </operator>
+          <operator activated="true" class="performance_classification" compatibility="9.10.013" expanded="true" height="82" name="Performance" width="90" x="514" y="34">
+            <parameter key="main_criterion" value="first"/>
+            <parameter key="accuracy" value="true"/>
+            <parameter key="classification_error" value="false"/>
+            <parameter key="kappa" value="false"/>
+            <parameter key="weighted_mean_recall" value="false"/>
+            <parameter key="weighted_mean_precision" value="false"/>
+            <parameter key="spearman_rho" value="false"/>
+            <parameter key="kendall_tau" value="false"/>
+            <parameter key="absolute_error" value="false"/>
+            <parameter key="relative_error" value="false"/>
+            <parameter key="relative_error_lenient" value="false"/>
+            <parameter key="relative_error_strict" value="false"/>
+            <parameter key="normalized_absolute_error" value="false"/>
+            <parameter key="root_mean_squared_error" value="false"/>
+            <parameter key="root_relative_squared_error" value="false"/>
+            <parameter key="squared_error" value="false"/>
+            <parameter key="correlation" value="false"/>
+            <parameter key="squared_correlation" value="false"/>
+            <parameter key="cross-entropy" value="false"/>
+            <parameter key="margin" value="false"/>
+            <parameter key="soft_margin_loss" value="false"/>
+            <parameter key="logistic_loss" value="false"/>
+            <parameter key="skip_undefined_labels" value="true"/>
+            <parameter key="use_example_weights" value="true"/>
+            <list key="class_weights"/>
+          </operator>
+          <connect from_port="in 1" to_op="Split Data" to_port="example set"/>
+          <connect from_op="Split Data" from_port="partition 1" to_op="Logistic Regression" to_port="training set"/>
+          <connect from_op="Split Data" from_port="partition 2" to_op="Apply Model" to_port="unlabelled data"/>
+          <connect from_op="Logistic Regression" from_port="model" to_op="Apply Model" to_port="model"/>
+          <connect from_op="Apply Model" from_port="labelled data" to_op="Performance" to_port="labelled data"/>
+          <connect from_op="Performance" from_port="performance" to_port="out 1"/>
+          <connect from_op="Performance" from_port="example set" to_port="out 2"/>
+          <portSpacing port="source_in 1" spacing="0"/>
+          <portSpacing port="source_in 2" spacing="0"/>
+          <portSpacing port="sink_out 1" spacing="0"/>
+          <portSpacing port="sink_out 2" spacing="0"/>
+          <portSpacing port="sink_out 3" spacing="0"/>
+        </process>
+      </operator>
+      <operator activated="false" class="store" compatibility="9.10.013" expanded="true" height="68" name="Store" width="90" x="715" y="85">
+        <parameter key="repository_entry" value="//Lab Assignment - Supervised Learning Models/Results/7. Model (Logistic Regression)"/>
+      </operator>
+      <connect from_op="Retrieve 4. Clean Selected Attributes" from_port="output" to_op="Select Attributes (3)" to_port="example set input"/>
+      <connect from_op="Select Attributes (3)" from_port="example set output" to_op="Set Role" to_port="example set input"/>
+      <connect from_op="Set Role" from_port="example set output" to_op="Sample (Stratified)" to_port="example set input"/>
+      <connect from_op="Sample (Stratified)" from_port="example set output" to_op="Normalize" to_port="example set input"/>
+      <connect from_op="Normalize" from_port="example set output" to_op="Split,Train, Test" to_port="in 1"/>
+      <connect from_op="Split,Train, Test" from_port="out 1" to_port="result 2"/>
+      <connect from_op="Split,Train, Test" from_port="out 2" to_port="result 1"/>
+      <portSpacing port="source_input 1" spacing="0"/>
+      <portSpacing port="sink_result 1" spacing="0"/>
+      <portSpacing port="sink_result 2" spacing="0"/>
+      <portSpacing port="sink_result 3" spacing="0"/>
+    </process>
+  </operator>
+</process>
